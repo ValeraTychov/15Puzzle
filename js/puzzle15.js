@@ -228,7 +228,7 @@ function Puzzle15(width, height, columns, rows){
       randomDirection = directions[Math.floor(Math.random() * 4)];
       targetPosition = hole + randomDirection;
       if (targetPosition > 0 && targetPosition <= frameSize){ 
-        if (tryExchange(tiles.getTile(targetPosition)) i++;
+        if (tryExchange(tiles.getTile(targetPosition))) i++;
       }
     }
     tiles.setCurrentAll();
