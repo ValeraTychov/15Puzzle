@@ -224,12 +224,11 @@ function Puzzle15(width, height, columns, rows){
         targetPosition,
         i = 0;
 
-    while (i < 1000){
+    while (i < 100){
       randomDirection = directions[Math.floor(Math.random() * 4)];
       targetPosition = hole + randomDirection;
       if (targetPosition > 0 && targetPosition <= frameSize){ 
-        tryExchange(tiles.getTile(targetPosition));
-        i++;
+        if (tryExchange(tiles.getTile(targetPosition)) i++;
       }
     }
     tiles.setCurrentAll();
