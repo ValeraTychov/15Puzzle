@@ -1,0 +1,105 @@
+.puzzle15-container {
+  position: absolute;
+  top: 50px;
+  left: 50%;
+  transform: translate(-50%, 0%);
+  border-radius: 7px;
+  box-shadow: inset 0px 0px 5px 1px rgba(255,255,255,0.5);
+  overflow: hidden;
+  font-family: Gill Sans MT;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: normal;
+  letter-spacing: 0px;
+  color: white;
+  cursor: default;
+  text-indent: 0px;
+}
+
+.puzzle15-container:before {
+  content: '';
+  position: absolute;
+  height: 40px;
+  left: 0px;
+  bottom: 0px;
+  right: 0px;
+  background-color: black;
+  box-shadow: 0px -7px 8px 0px rgba(255,255,255,0.1);
+}
+    
+.puzzle15-container:after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image: url(../img/image.jpg);
+  background-position: 50% 50%;
+  background-size: cover;
+  filter: blur(5px);
+  z-index: -1;
+}
+
+.puzzle15-tile {
+  position: absolute;
+  //transform: scale(0.9);
+  box-sizing: border-box;
+  background-image: radial-gradient(ellipse closest-corner at 70% 70%, rgba(255,255,255,0.3), rgba(0,0,0,0));
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.4),
+              inset 0px 0px 0px 1px rgba(255,255,255,0.2),
+              inset 0px 0px 50px 1px rgba(0,0,0,0.3);
+  border-radius: 6px;
+  text-align: center;
+  color: #FFE7FC;
+  text-shadow: -1px -1px 1px #666;
+  user-select: none;
+  -moz-user-select: none;
+  overflow: hidden;
+  transition-property: top, left;
+  transition-duration: .3s;
+}
+
+.puzzle15-tile:before {
+  content: '';
+  position: absolute;
+  background-image: linear-gradient(to bottom, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0.05));
+  border-radius: 50%;
+}
+
+.puzzle15-control-panel{
+  position: absolute;
+  transform: translate(-50%, -50%);
+  
+}
+.puzzle15-control-panel.button{
+  height: 38px;
+  left: 50%;
+  font-size: 38px;
+  line-height: 38px;
+}
+
+.puzzle15-control-panel.button:hover{
+  transform: translate(-50%,-50%);
+}
+
+.puzzle15-control-panel.button:active{
+  transform: translate(-47.8%,-47.8%);
+}
+
+.puzzle15-control-panel.counter{
+  left: 25%;
+  line-height: 24px;
+}
+
+.puzzle15-control-panel.timer{
+  left: 75%;
+  line-height: 24px;
+}
+
+.puzzle15-container.win .puzzle15-tile {
+  opacity: 0;
+  transition: opacity 2s;
+}
+.puzzle15-container.win:after {
+  filter: blur(0.5px);
+  transition: filter 3s;
+}

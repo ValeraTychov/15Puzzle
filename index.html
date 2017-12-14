@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>15 Puzzle Game</title>
+  <link rel="stylesheet" type="text/css" href="css/main.css">
+  <link rel="stylesheet" type="text/css" href="css/puzzle15.css">
+  <script src="js/puzzle15.js"></script>
+</head>
+<body>
+  <div>
+    <form id="create_form">
+     <div>
+       <label for="form_width">Width</label>
+       <input type="text" name="width" pattern="^[0-9]+$" value="400" autocomplete="off">
+     </div>
+     <div>
+       <label for="form_height">Height</label>
+       <input type="text" name="height" pattern="^[0-9]+$" value="400" autocomplete="off">
+     </div>
+     <div>
+       <label for="form_columns">Columns</label>
+       <input type="text" name="columns" pattern="^[0-9]+$" value="4" autocomplete="off">
+     </div>
+     <div>
+       <label for="form_rows">Rows</label>
+       <input type="text" name="rows" pattern="^[0-9]+$" value="4" autocomplete="off">
+     </div>
+     <div>
+       <input type="submit" value="Create">
+     </div>
+    </form>
+    
+  </div>
+ 
+  <div class="puzzle15-container"></div>
+
+  <script>
+    var puzzle15 = new Puzzle15(400, 400, 4, 4);
+    
+    create_form.onsubmit = function(){
+      var width   = create_form.elements.width.value,
+          height  = create_form.elements.height.value,
+          columns = create_form.elements.columns.value,
+          rows    = create_form.elements.rows.value;
+      
+      puzzle15.destroy();
+      puzzle15 = new Puzzle15(width, height, columns, rows);
+      return false;
+    }
+    
+  </script> 
+</body>
+</html>
