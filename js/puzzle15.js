@@ -153,8 +153,7 @@ function Puzzle15(width, height, columns, rows){
       for (var j = 0; j < columns; j++){
         cssRuleSet = [
           '[data-current-position="' + ++tileNo + '"]',
-          'left: ' + (j * tileWidth + 5) + 'px;',
-          'top: '+ (i * tileHeight + 5) + 'px;'
+          'transform: translate(' + (j * tileWidth + 5) + 'px, ' + (i * tileHeight + 5) + 'px);'
         ];
         style.innerHTML += formatCSSRuleSet(cssRuleSet,0,2);            
 
