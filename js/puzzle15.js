@@ -1,317 +1,425 @@
-"use strict";
+(function(){
+  "use strict";
 
-function Puzzle15(width, height, columns, rows){
-  var width = +width || 400,
-      height = +height || 400,
-      columns = +columns || 4,
-      rows = +rows || 4, 
-      frameSize   = columns * rows,
-      hole        = frameSize,
-      tileWidth   = Math.floor(width / columns),
-      tileHeight  = Math.floor(height / rows),
-      tiles       = [],
-      style       = document.createElement('style'),
-      isStart     = false,
-      container   = {},
-      button      = {},
-      timer       = {},
-      counter     = {};
-  
-  width = tileWidth * columns;
-  height = tileHeight * rows;
-      
-  tiles.setCurrentAll = function(){
-    for (var i = 0, l = this.length; i < l; i++){
-      this[i].setCurrent();
-    }
-  }
-  
-  tiles.checkEqualAll = function(){
-    for (var i = 0, l = this.length; i < l; i++){
-      if(!this[i].checkEqual()) return false;
-    }
-    return true;
-  }
-  
-  tiles.getTile = function(position){
-    for (var i = 0, l = this.length; i < l; i++){
-      if (this[i].currentPosition == position) return this[i];
-    }
-  }
-  
-  function Tile(elem){
-    this.element = elem;    
-    this.initialPosition;
-    this.currentPosition;
-
-    this.setCurrent = function(){
-      this.element.dataset.currentPosition = this.currentPosition;
+  function initialize(width, height, columns, rows){
+    var container = document.querySelector('.puzzle15-container');
+    if (!container) {
+      alert('15 Puzzle Game: There\'s no <div class="puzzle15-container"></div> in the document');
+      return;
     }
 
-    this.checkEqual = function(){
-      if (this.initialPosition == this.currentPosition) return true;
-      return false;
+    var width       = +width || 400,
+        height      = +height || 400,
+        columns     = +columns || 4,
+        rows        = +rows || 4,
+        tileWidth   = Math.floor(width / columns),
+        tileHeight  = Math.floor(height / rows);
+
+        width = tileWidth * columns;
+        height = tileHeight * rows;
+
+    var options = {
+      varStyleProperies: {
+        width:      width,
+        height:     height,
+        columns:    columns,
+        rows:       rows,
+        tileWidth:  tileWidth,
+        tileHeight: tileHeight,
+      },
+      parent: container,
+      viewBuilder: new ViewBuilder(),
+      eventManager: new EventManager()
     }
-  }
-  
-  function Timer(elem){
-    var element = elem;
-   
-    this.timerId = 0;
-    
-    this.redraw = function(min,sec){
-      min = min || 0;
-      sec = sec || 0;
-      element.innerHTML = ~~(min/10) +''+ min % 10 + ':' + ~~(sec/10) +''+ sec % 10;
+
+    setInitialStyles(options);
+    container.classList.remove('win');
+        
+    var tileSet = new TileSet(options);
+    var timer = new Timer(options);
+    var counter = new Counter(options);
+    var button = new Button(options);
+
+    options.eventManager.on('gamestart', function (){container.classList.remove('win');} );
+    options.eventManager.on('gamewin', function (){container.classList.add('win');} );
+
+    function destroy(){
+      if ('stop' in timer) timer.stop();
+      if ('element' in options.viewBuilder) options.viewBuilder.element.remove();
+      if ('innerHTML' in container) container.innerHTML = "";
     }
-    
-    this.start = function(delay){ 
-      if (this.timerId) return;
-      this.redraw();
-      
-      var self      = this, 
-          startTime = new Date();
-      
-      this.timerId = setInterval(function(){
-        var currentTime = new Date() - startTime,
-            min         = ~~(currentTime / 60000),
-            sec         = ~~(currentTime / 1000 - min * 60);
-        self.redraw(min, sec);
-      }, delay || 500);
-    }
-    
-    this.stop = function(){
-      if (!this.timerId) return;
-      clearInterval(this.timerId);
-      this.timerId = 0;
-    }
-  }
-  
-  function Counter(elem){
-    var element = elem;
-    
-    this.redraw = function(amount){
-      amount = amount || 0;
-      element.innerHTML = Array(5 - String(amount).length).join('0') + (+amount);
-    }
-    
-    this.increase = function(){
-      this.redraw(+element.innerHTML + 1);
-    }
+    puzzle15.destroy = destroy;
+  };
+
+  function ViewBuilder(){
+    this.styleStringBuffer = "";
+    this.style = document.createElement('style');
+    document.head.appendChild(this.style);
   }
 
-  function setInitialStyles(){
-    var cssRuleSet;
+  ViewBuilder.prototype.buildView = function(viewModel){
+    var element;
+    if (viewModel.type) element = document.createElement(viewModel.type);
+    if (viewModel.classes.length) {
+      for (var i = 0, l = viewModel.classes.length; i < l; i++){
+        element.classList.add(viewModel.classes[i]);
+      }
+    }
+    if (viewModel.properties) {
+      for (var key in viewModel.properties){
+        element[key] = viewModel.properties[key];
+      }
+    }
+    if (viewModel.parent) viewModel.parent.appendChild(element);
+    if (viewModel.style.length) this.addToStyle(viewModel.style);
 
-    cssRuleSet = [
-      '.puzzle15-container', //Selector
-      'height: ' + (height + 40) + 'px;', //Declarations...
-      'width: ' + width + 'px;'
-    ];
-    style.innerHTML += formatCSSRuleSet(cssRuleSet, 0, 2);
-
-    cssRuleSet = [
-      '.puzzle15-tile',
-      'width: ' + (tileWidth - 10) + 'px;',
-      'height: ' + (tileHeight - 10) + 'px;',
-      'line-height:' + (tileHeight - 10) + 'px;',
-      'font-size: '+ (tileWidth <= tileHeight ? ~~(tileWidth*0.5) : ~~(tileHeight*0.5)) +'px;'
-    ];
-    style.innerHTML += formatCSSRuleSet(cssRuleSet, 0, 2);
-    
-    cssRuleSet = [
-      '.puzzle15-tile:before',
-      'width: ' + tileWidth * 1.5 + 'px;',
-      'height: ' + tileHeight * 0.9  + 'px;',
-      'left: ' + (-tileWidth * 0.25) + 'px;',
-      'top: ' + (-tileHeight * 0.5) + 'px;'
-    ];
-    style.innerHTML += formatCSSRuleSet(cssRuleSet, 0, 2);
-   
+    return element;
   }
 
-  function formatCSSRuleSet(data, selectorIndent, declarationsIndent){
+  ViewBuilder.prototype.formatCSSRuleSet = function(data, selectorIndent, declarationsIndent){
     var sI  = Array((selectorIndent || 0) + 1).join(' '),
         dI  = Array((declarationsIndent || 0) + 1).join(' '),
         str = sI;
-
     str += data[0] + ' {\n';
     for (var i = 1; i < data.length; i++){
       str += dI + data[i] + '\n';
     }
     str += sI + '}\n';
-
     return str;
   }
+  
+  ViewBuilder.prototype.addToStyle = function(cssRuleSet){
+    if (typeof(cssRuleSet) == 'string') {this.style.innerHTML += cssRuleSet}
+    else {this.style.innerHTML += this.formatCSSRuleSet(cssRuleSet, 0, 2)}
+  }
 
-  function createTiles(){
-    var tile,
-        tileNo       = 0,
+  ViewBuilder.prototype.addToStyleBuffer = function(cssRuleSet){
+    if (typeof(cssRuleSet) == 'string') {this.styleStringBuffer += cssRuleSet}
+    else {this.styleStringBuffer += this.formatCSSRuleSet(cssRuleSet, 0, 2)}
+  }
+
+  ViewBuilder.prototype.addBufferToStyle = function(){
+    this.addToStyle(this.styleStringBuffer);
+  }
+
+  function EventManager(){
+    this.events = {};
+  }
+
+  EventManager.prototype.on = function(eventName, callback){
+    if (!this.events[eventName]) this.events[eventName] = [];
+    this.events[eventName].push (callback);
+  }
+
+  EventManager.prototype.trigger = function(eventName){
+    if (this.events[eventName]){
+      for (var i = 0, l = this.events[eventName].length; i < l; i++){
+        this.events[eventName][i]();
+      }
+    }
+  }
+
+  function TileSet (options) {
+    var self            = this,
+        initialPosition = 0, 
+        vSP             = options.varStyleProperies,
         cssRuleSet;
 
-    for (var i = 0; i < rows; i++)
-      for (var j = 0; j < columns; j++){
-        cssRuleSet = [
-          '[data-current-position="' + ++tileNo + '"]',
-          'transform: translate(' + (j * tileWidth + 5) + 'px, ' + (i * tileHeight + 5) + 'px);'
-        ];
-        style.innerHTML += formatCSSRuleSet(cssRuleSet,0,2);            
+    this.tiles        = [];
+    this.hole         = {};
+    this.columns      = vSP.columns || 4;
+    this.rows         = vSP.rows || 4;
+    this.eventManager = options.eventManager;
+    this.isStart      = false;
 
-        if (i == rows - 1 && j == columns - 1) {
+    for (var i = 0; i < this.rows; i++){
+      for (var j = 0; j < this.columns; j++){
+        cssRuleSet = [ //Array where first element is CSS selector, the others are CSS properties.
+          '[data-current-position="' + ++initialPosition + '"]', 
+          'transform: translate(' + (j * vSP.tileWidth + 5) + 'px, ' + (i * vSP.tileHeight + 5) + 'px);' //Properties
+        ];
+        options.viewBuilder.addToStyle(cssRuleSet);            
+
+        if (i == this.rows - 1 && j == this.columns - 1) {
+          this.hole.initialPosition = this.rows * this.columns;
+          this.hole.currentPosition = this.hole.initialPosition;
+          this.tiles.push(this.hole);
           continue;
         }
-
-        tile = new Tile(document.createElement('div'));
-        tile.element.className = 'puzzle15-tile';
-        tile.element.innerHTML = tileNo;
-        tile.initialPosition = tileNo;
-        tile.currentPosition = tileNo;
-        tile.setCurrent();
-        
-        tiles.push(tile);
-
-        container.appendChild(tile.element);
+        this.tiles.push(new Tile(options, initialPosition));
       }
+    }
+
+    options.parent.onmousedown = function(event){ //Tile click handler
+      if (!self.isStart) return;
+      event.preventDefault();
+      event.stopPropagation();
+      var target = event.target;
+          
+      if (!target.classList.contains('puzzle15-tile')) return; 
+  
+      var tile = self.getTile(target.dataset.currentPosition);
+      
+      if (self.tryExchange(tile)){
+        tile.setCurrent();
+        self.eventManager.trigger('gamemove');
+        if (self.checkEqualAll()) self.eventManager.trigger('gamewin');
+      }
+    };
+    this.eventManager.on('gamestart', (function(){this.shuffle(); this.isStart = true;}).bind(this));
+    this.eventManager.on('gamereset', (function(){this.reset(); this.isStart = false;}).bind(this));
+    this.eventManager.on('gamewin',(function(){this.isStart = false;}).bind(this)); 
   }
 
-  function createControlPanel(){
-    var cssRuleSet,
-        timerPanel,
-        counterPanel;
+  TileSet.prototype.setCurrentAll = function(){ // Set all tile's currentPossition properties to their own DOM elements. 
+    for (var i = 0, l = this.tiles.length - 1; i < l; i++){ // (this.tiles.length - 1) because last element of tiles array is hole.
+      this.tiles[i].setCurrent();
+    }
+  }
     
-    cssRuleSet = [
-      '.puzzle15-control-panel',
-      'top: ' + (height + 21) + 'px;'
-    ];
-    style.innerHTML += formatCSSRuleSet(cssRuleSet,0,2);
+  TileSet.prototype.checkEqualAll = function(){ // Check that all tile's current possitions equals their initial positions.
+    for (var i = 0, l = this.tiles.length - 1; i < l; i++){
+      if(!this.tiles[i].checkEqual()) return false;
+    }
+    return true;
+  }
     
-    button = document.createElement('span');
-    button.classList.add('puzzle15-control-panel');
-    button.classList.add('button');
-    button.innerHTML = '&#9655';
-    
-    counterPanel = document.createElement('span');
-    counterPanel.classList.add('puzzle15-control-panel');
-    counterPanel.classList.add('counter');
-    counter = new Counter(counterPanel);
-    counter.redraw();
-    cssRuleSet = [
-      '.puzzle15-control-panel.counter',
-      'font-size: ' + (width > 150 ? 24 : width * 0.14)  + 'px;'
-    ];
-    style.innerHTML += formatCSSRuleSet(cssRuleSet,0,2);
-    
-    timerPanel = document.createElement('span');
-    timerPanel.classList.add('puzzle15-control-panel');
-    timerPanel.classList.add('timer');
-    timer = new Timer(timerPanel);
-    timer.redraw();
-    cssRuleSet = [
-      '.puzzle15-control-panel.timer',
-      'font-size: ' + (width > 150 ? 24 : width * 0.14)  + 'px;'
-    ];
-    style.innerHTML += formatCSSRuleSet(cssRuleSet,0,2);
-
-    container.appendChild(counterPanel);
-    container.appendChild(button);
-    container.appendChild(timerPanel);
+  TileSet.prototype.getTile = function(position){
+    for (var i = 0, l = this.tiles.length - 1; i < l; i++){
+      if (this.tiles[i].currentPosition == position) return this.tiles[i];
+    }
   }
 
-  function shuffle(){
-    var directions = [-columns, -1, 1, columns],
+  TileSet.prototype.shuffle = function(){
+    var directions = [-this.columns, -1, 1, this.columns],
         randomDirection,
         targetPosition,
         i = 0;
 
     while (i < 100){
       randomDirection = directions[Math.floor(Math.random() * 4)];
-      targetPosition = hole + randomDirection;
-      if (targetPosition > 0 && targetPosition <= frameSize){ 
-        if (tryExchange(tiles.getTile(targetPosition))) i++;
+      targetPosition = this.hole.currentPosition + randomDirection;
+      if (targetPosition > 0 && targetPosition <= this.hole.initialPosition){ 
+        if (this.tryExchange(this.getTile(targetPosition))) i++;
       }
     }
-    tiles.setCurrentAll();
+    this.setCurrentAll();
   }
-  
-  function tryExchange(tile){
+
+  TileSet.prototype.tryExchange = function(tile){
     var targetPosition = +tile.currentPosition;
-    if (targetPosition - columns == hole || 
-        targetPosition + columns == hole ||
-        (targetPosition - 1) % columns  && (targetPosition - 1 == hole) ||
-        targetPosition % columns        && (targetPosition + 1 == hole) 
-       )
+    if (targetPosition - this.columns == this.hole.currentPosition || 
+        targetPosition + this.columns == this.hole.currentPosition ||
+        (targetPosition - 1) % this.columns  && (targetPosition - 1 == this.hole.currentPosition) ||
+        targetPosition % this.columns        && (targetPosition + 1 == this.hole.currentPosition) 
+      )
     {
-      tile.currentPosition = hole;
-      hole = targetPosition;
+      tile.currentPosition = this.hole.currentPosition;
+      this.hole.currentPosition = targetPosition;
       return true;
     }
     return false;
   }
 
-  function reset(){
-    for (var i = 0, l = tiles.length; i < l; i++){
-      tiles[i].currentPosition = tiles[i].initialPosition;
+  TileSet.prototype.reset = function(){
+    for (var i = 0, l = this.tiles.length; i < l; i++){
+      this.tiles[i].currentPosition = this.tiles[i].initialPosition;
     }
-    tiles.setCurrentAll();
-    hole = frameSize;
-    timer.stop();
-    isStart = false;
+    this.setCurrentAll();
   }
 
-  function winHandler(){
-    timer.stop();
-    isStart = false;
-    container.classList.add('win');
+  function Tile(options, initialPosition){
+    this.element = {};    
+    this.initialPosition = initialPosition;
+    this.currentPosition = initialPosition;
+
+    this.viewModel = {
+      parent: options.parent,
+      type: 'div',
+      classes: [
+        'puzzle15-tile'
+      ],
+      properties: {
+        innerHTML:  this.initialPosition
+      },
+      style:  []
+    }
+
+    this.element = options.viewBuilder.buildView(this.viewModel);
+
+    this.setCurrent();
+  }
+  
+  Tile.prototype.setCurrent = function(){
+    this.element.dataset.currentPosition = this.currentPosition;
   }
 
-  function tileClickHandler(event){
-    if (!isStart) return;
-    event.preventDefault();
-    event.stopPropagation();
-    var target = event.target;
-        
-    if (!target.classList.contains('puzzle15-tile')) return; 
+  Tile.prototype.checkEqual = function(){
+    if (this.initialPosition == this.currentPosition) return true;
+    return false;
+  }
+  
+  function Timer(options){
+    var vSP = options.varStyleProperies;
+    this.element      = {};
+    this.timerId      = 0;
+    this.eventManager = options.eventManager;
 
-    var tile = tiles.getTile(target.dataset.currentPosition);
+    this.viewModel = {
+      parent: options.parent,
+      type: 'span',
+      classes: [
+        'puzzle15-control-panel',
+        'timer'
+      ],
+      properties: {},
+      style:  [
+        '.puzzle15-control-panel.timer',
+        'font-size: ' + (vSP.width > 150 ? 24 : vSP.width * 0.14)  + 'px;'
+      ]
+    }
+    this.element = options.viewBuilder.buildView(this.viewModel);
+    this.redraw();
+
+    this.eventManager.on('gamestart', (function(){
+      this.stop();
+      this.start();
+    }).bind(this));
+
+    this.eventManager.on('gamereset', this.stop.bind(this));
+    this.eventManager.on('gamewin', this.stop.bind(this));
     
-    if (tryExchange(tile)){
-      tile.setCurrent();
-      counter.increase();
-      if (tiles.checkEqualAll()) winHandler();
+  }
+    
+  Timer.prototype.redraw = function(min,sec){
+    min = min || 0;
+    sec = sec || 0;
+    this.element.innerHTML = ~~(min/10) +''+ min % 10 + ':' + ~~(sec/10) +''+ sec % 10;
+  }
+    
+  Timer.prototype.start = function(delay){ 
+    if (this.timerId) return;
+    this.redraw();
+    
+    var self      = this, 
+        startTime = new Date();
+    
+    this.timerId = setInterval(function(){
+      var currentTime = new Date() - startTime,
+          min         = ~~(currentTime / 60000),
+          sec         = ~~(currentTime / 1000 - min * 60);
+      self.redraw(min, sec);
+    }, delay || 500);
+  }
+  
+  Timer.prototype.stop = function(){
+    if (!this.timerId) return;
+    clearInterval(this.timerId);
+    this.timerId = 0;
+  }
+
+  
+  function Counter(options){
+    var vSP = options.varStyleProperies;
+    this.element = {};
+    this.eventManager = options.eventManager;
+
+    this.viewModel = {
+      parent: options.parent,
+      type: 'span',
+      classes: [
+        'puzzle15-control-panel',
+        'counter'
+      ],
+      properties: {},
+      style:  [
+        '.puzzle15-control-panel.counter',
+        'font-size: ' + (vSP.width > 150 ? 24 : vSP.width * 0.14)  + 'px;'
+      ]
     }
-  }   
 
-  function startGame(){
-    container.classList.remove('win');
-    counter.redraw();
-    shuffle();
-    timer.stop();
-    timer.start();
-    isStart = true;
+    this.element = options.viewBuilder.buildView(this.viewModel);
+    this.redraw();
+
+    this.eventManager.on('gamestart', this.redraw.bind(this));
+    this.eventManager.on('gamemove', this.increase.bind(this));
+
   }
-  
-  function destroy(){
-    if ('stop' in timer) timer.stop();
-    if (style) style.remove();
-    if ('innerHTML' in container) container.innerHTML = "";
+    
+  Counter.prototype.redraw = function(amount){
+    amount = amount || 0;
+    this.element.innerHTML = Array(5 - String(amount).length).join('0') + (+amount);
   }
-  
-  this.destroy = destroy;
-  
-  // Initialization //
-  container = document.querySelector('.puzzle15-container');
-  if (!container) {alert('15 Puzzle Game: There\'s no <div class="puzzle15-container"></div> in the document'); return;}
-  container.classList.remove('win');
-  
-  if (!(width && height && columns && rows)) {alert('15 Puzzle Game: Incorrect input data'); return;}
+    
+  Counter.prototype.increase = function(){
+    this.redraw(+this.element.innerHTML + 1);
+  }
 
-  setInitialStyles();
-  createTiles();
-  createControlPanel();
-  document.head.appendChild(style);
+  function Button(options){
+    this.element = {};
+    this.eventManager = options.eventManager;
 
-  container.onmousedown = tileClickHandler;
-  button.onmousedown = startGame;
-  button.onwheel = reset;
+    this.viewModel = {
+      parent: options.parent,
+      type: 'span',
+      classes: [
+        'puzzle15-control-panel',
+        'button'
+      ],
+      properties: {
+        innerHTML: '&#9655'
+      },
+      style:  []
+    }
 
-}
+    this.element = options.viewBuilder.buildView(this.viewModel);
+  
+    this.element.onmousedown = this.eventManager.trigger.bind(this.eventManager, 'gamestart');
+    this.element.onwheel = this.eventManager.trigger.bind(this.eventManager, 'gamereset');
+  }
+
+  function setInitialStyles(options){
+    var vSP = options.varStyleProperies, 
+        cssRuleSet;
+
+    cssRuleSet = [
+      '.puzzle15-container', //Selector
+      'height: ' + (vSP.height + 40) + 'px;', //Declarations...
+      'width: ' + vSP.width + 'px;'
+    ];
+    options.viewBuilder.addToStyleBuffer(cssRuleSet);
+
+    cssRuleSet = [
+      '.puzzle15-control-panel',
+      'top: ' + (vSP.height + 21) + 'px;'
+    ];
+    options.viewBuilder.addToStyleBuffer(cssRuleSet);
+
+    cssRuleSet = [
+      '.puzzle15-tile',
+      'width: ' + (vSP.tileWidth - 10) + 'px;',
+      'height: ' + (vSP.tileHeight - 10) + 'px;',
+      'line-height:' + (vSP.tileHeight - 10) + 'px;',
+      'font-size: '+ (vSP.tileWidth <= vSP.tileHeight ?
+                   ~~(vSP.tileWidth*0.5) :
+                   ~~(vSP.tileHeight*0.5)) +'px;'
+    ];
+    options.viewBuilder.addToStyleBuffer(cssRuleSet);
+    
+    cssRuleSet = [
+      '.puzzle15-tile:before',
+      'width: ' + vSP.tileWidth * 1.5 + 'px;',
+      'height: ' + vSP.tileHeight * 0.9  + 'px;',
+      'left: ' + (-vSP.tileWidth * 0.25) + 'px;',
+      'top: ' + (-vSP.tileHeight * 0.5) + 'px;'
+    ];
+    options.viewBuilder.addToStyleBuffer(cssRuleSet);
+    options.viewBuilder.addBufferToStyle();
+
+  }
+
+  var puzzle15 = {};
+  puzzle15.create = initialize;
+  window.puzzle15 = puzzle15;
+
+})();

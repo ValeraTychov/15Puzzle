@@ -22,6 +22,14 @@ form>div {
   margin: 8px 0px;
 }
 
+form p {
+  text-align: center;
+  margin: 0;
+  font-size: 14px;
+  line-height: 14px;
+
+}
+
 form input[type="text"] {
   float: right;
   width: 50%;
@@ -32,6 +40,6 @@ form input[type="text"] {
 form input[type="submit"] {
   float: right;
   width: 100%;
-  margin: 5px 0px;
+  margin: 5px 0px 10px 0px;
   right: 0px;
 }

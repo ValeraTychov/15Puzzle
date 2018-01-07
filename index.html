@@ -29,6 +29,8 @@
      <div>
        <input type="submit" value="Create">
      </div>
+     <p>Click &#x25ba to start/restart</p>
+     <p>Scroll &#x25ba to reset</p>
     </form>
     
   </div>
@@ -36,7 +38,7 @@
   <div class="puzzle15-container"></div>
 
   <script>
-    var puzzle15 = new Puzzle15(400, 400, 4, 4);
+    puzzle15.create(400, 400, 4, 4);
     
     create_form.onsubmit = function(){
       var width   = create_form.elements.width.value,
@@ -45,7 +47,7 @@
           rows    = create_form.elements.rows.value;
       
       puzzle15.destroy();
-      puzzle15 = new Puzzle15(width, height, columns, rows);
+      puzzle15.create(width, height, columns, rows);
       return false;
     }
     
