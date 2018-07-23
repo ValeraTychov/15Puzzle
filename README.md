@@ -1,8 +1,13 @@
-# 15-puzzle
+# 15-puzzle 
 
-Yet another version of the classic game. This project has been created using pure Vanilla JS (ES5) and CSS3 animations.
+My version of the classic game. This project was created using pure Vanilla JS (ES5) and CSS3 animations for self-study.
 
 [![Open](https://valeratychov.github.io/15puzzle/img/image.jpg)](https://valeratychov.github.io/15puzzle/)
 
 [valeratychov.github.io/15puzzle/](https://valeratychov.github.io/15puzzle/)
+
+- - -
+
+![](/img/warning.png)
+
 
