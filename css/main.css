@@ -1,19 +1,40 @@
-body {            
+body, html {            
+  margin: 0px;
   user-select: none;
   -moz-user-select: none;
 }
 
-form {
-  position: absolute;
-  padding: 0px 5px 5px 5px;
-  width: 150px;
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   border: 1px solid #000;
   box-shadow: 1px 1px 5px #aaa;
   opacity: 0.15;
   transition: opacity 0.1s;
 }
 
-form:hover {
+.label {
+  font-size: 50px;
+  margin: 0px 20px;
+}
+
+.instructions p{
+  margin: 0px 20px;
+  text-align: right;
+}
+
+.form {
+  margin: 0px;
+  width: 50%;
+}
+
+form {
+  display: flex;
+  padding: 0px 5px 5px 5px;
+}
+
+.header:hover {
   opacity: 1;
   transition: opacity 0.1s;
 }
@@ -22,24 +43,18 @@ form>div {
   margin: 8px 0px;
 }
 
-form p {
-  text-align: center;
-  margin: 0;
-  font-size: 14px;
-  line-height: 14px;
-
+form label {
+  display: inline-block;
+  width: 80px;
 }
 
 form input[type="text"] {
-  float: right;
   width: 50%;
   right: 0px;
   text-align: right;
 }
     
 form input[type="submit"] {
-  float: right;
-  width: 100%;
-  margin: 5px 0px 10px 0px;
+  margin: 0px;
   right: 0px;
 }

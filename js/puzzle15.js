@@ -150,7 +150,7 @@
       }
     }
 
-    options.parent.onmousedown = function(event){ //Tile click handler
+    options.parent.onpointerdown = function(event){ //Tile click handler
       if (!self.isStart) return;
       event.preventDefault();
       event.stopPropagation();
@@ -374,7 +374,7 @@
 
     this.element = options.viewBuilder.buildView(this.viewModel);
   
-    this.element.onmousedown = this.eventManager.trigger.bind(this.eventManager, 'gamestart');
+    this.element.onpointerdown = this.eventManager.trigger.bind(this.eventManager, 'gamestart');
     this.element.onwheel = this.eventManager.trigger.bind(this.eventManager, 'gamereset');
   }
 

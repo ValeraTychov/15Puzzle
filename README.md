@@ -6,8 +6,6 @@ My version of the classic game. This project was created using pure Vanilla JS (
 
 [valeratychov.github.io/15puzzle/](https://valeratychov.github.io/15puzzle/)
 
-- - -
-
 ![](/img/warning.png)
 
 

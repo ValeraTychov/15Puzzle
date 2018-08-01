@@ -5,33 +5,43 @@
   <title>15 Puzzle Game</title>
   <link rel="stylesheet" type="text/css" href="css/main.css">
   <link rel="stylesheet" type="text/css" href="css/puzzle15.css">
+  <meta name="viewport" content="width=device-width">
   <script src="js/puzzle15.js"></script>
 </head>
 <body>
-  <div>
-    <form id="create_form">
-     <div>
-       <label for="form_width">Width</label>
-       <input type="text" name="width" pattern="^[0-9]+$" value="400" autocomplete="off">
-     </div>
-     <div>
-       <label for="form_height">Height</label>
-       <input type="text" name="height" pattern="^[0-9]+$" value="400" autocomplete="off">
-     </div>
-     <div>
-       <label for="form_columns">Columns</label>
-       <input type="text" name="columns" pattern="^[0-9]+$" value="4" autocomplete="off">
-     </div>
-     <div>
-       <label for="form_rows">Rows</label>
-       <input type="text" name="rows" pattern="^[0-9]+$" value="4" autocomplete="off">
-     </div>
-     <div>
-       <input type="submit" value="Create">
-     </div>
-     <p>Click &#x25ba to start/restart</p>
-     <p>Scroll &#x25ba to reset</p>
-    </form>
+  <div class="header">
+    <div class="label">
+      15
+    </div>
+    <div class="instructions">
+      <p>Click &#x25ba to start/restart</p>
+      <p>Scroll &#x25ba to reset</p>
+    </div>
+    <div class="form">
+      <form id="create_form">
+        <div>
+          <label for="form_width">Width</label>
+          <input type="text" name="width" pattern="^[0-9]+$" value="400" autocomplete="off">
+          <br>
+          <label for="form_height">Height</label>
+          <input type="text" name="height" pattern="^[0-9]+$" value="400" autocomplete="off">
+        </div>
+    
+        <div>
+          <label for="form_columns">Columns</label>
+          <input type="text" name="columns" pattern="^[0-9]+$" value="4" autocomplete="off">
+          <br>
+          <label for="form_rows">Rows</label>
+          <input type="text" name="rows" pattern="^[0-9]+$" value="4" autocomplete="off">
+        </div>
+    
+        <div>
+          <input type="submit" value="Create">
+        </div>
+      
+      </form>
+    </div>
+    
     
   </div>
  
